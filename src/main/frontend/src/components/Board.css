@@ -1,0 +1,74 @@
+/* Board Page */
+.board-container {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: #1a1a1a;
+    min-height: 100vh;
+}
+
+/* Title */
+.board-title {
+    font-size: 2.5rem;
+    color: gold;
+    margin-bottom: 20px;
+}
+
+/* Columns Layout */
+.columns-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* Individual Column */
+.column {
+    background-color: #2C2C2C;
+    padding: 20px;
+    border-radius: 8px;
+    min-width: 250px;
+    max-width: 300px;
+    flex-grow: 1;
+    min-height: 400px; /* Ensures each column has space */
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    transition: background 0.3s;
+}
+
+/* Highlight column when hovered */
+.column:hover {
+    background-color: #333;
+}
+
+/* Column Title */
+.column h2 {
+    color: gold;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+/* Task Card */
+.task-card {
+    background-color: #333;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+    cursor: grab;
+    transition: transform 0.2s;
+}
+
+.task-card:active {
+    cursor: grabbing;
+    transform: scale(1.05);
+}
+
+.task-card h3 {
+    font-size: 1.2rem;
+    color: white;
+    margin-bottom: 5px;
+}
+
+.task-card p {
+    font-size: 1rem;
+    color: #bbb;
+}

@@ -1,8 +1,9 @@
 // TaskFlowInfo.js
 import React from "react";
-import "./Home.css"; // Keep using the same stylesheet
-import productivityImg from "../assets/productivity.png"; // Ensure the path is correct
-import keyFeaturesImg from "../assets/key-features.png"; // Ensure this image is saved in the correct folder
+import "./Home.css"; // Reuse the existing stylesheet
+import productivityImg from "../assets/productivity.png";
+import keyFeaturesImg from "../assets/key-features.png";
+import integrationImg from "../assets/integration.png"; // Ensure this image is saved in the correct folder
 
 function TaskFlowInfo() {
     return (
@@ -43,6 +44,32 @@ function TaskFlowInfo() {
                     </ul>
                 </div>
             </section>
+
+            {/* Section: Seamless Integration & Customization */}
+            {/* Section: Seamless Integration & Customization */}
+            <section className="integration">
+                <div className="integration-container">
+                    <div className="integration-image">
+                        <img src={integrationImg} alt="Integration with TaskFlow" />
+                    </div>
+                    <div className="integration-content">
+                        <h2>Seamless Integration & Customization</h2>
+                        <p>Effortlessly connect TaskFlow with your favorite tools and create custom workflows tailored to your needs.</p>
+                        <ul className="benefits-list">
+                            <li>✅ Integrates with Google Calendar, Notion, Slack, and more</li>
+                            <li>✅ Custom automation workflows for repetitive tasks</li>
+                            <li>✅ API access for developers to build advanced features</li>
+                            <li>✅ Fully customizable dashboard to fit your workflow</li>
+                        </ul>
+                        {/* Center the CTA button */}
+                        <div className="cta-container">
+                            <a href="/Signin_up" className="cta-button">Get Started</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
         </div>
     );
 }
