@@ -29,14 +29,6 @@
     min-width: 250px;
     max-width: 300px;
     flex-grow: 1;
-    min-height: 400px; /* Ensures each column has space */
-    border: 2px dashed rgba(255, 255, 255, 0.3);
-    transition: background 0.3s;
-}
-
-/* Highlight column when hovered */
-.column:hover {
-    background-color: #333;
 }
 
 /* Column Title */
@@ -53,13 +45,6 @@
     border-radius: 5px;
     margin-bottom: 10px;
     box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
-    cursor: grab;
-    transition: transform 0.2s;
-}
-
-.task-card:active {
-    cursor: grabbing;
-    transform: scale(1.05);
 }
 
 .task-card h3 {
