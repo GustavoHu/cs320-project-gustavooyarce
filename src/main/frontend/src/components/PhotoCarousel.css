@@ -1,0 +1,36 @@
+/* PhotoCarousel.css */
+.carousel-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto;
+    max-width: 600px;
+}
+
+.carousel-image-container {
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    border-radius: 8px;
+    margin: 0 10px;
+}
+
+.carousel-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.carousel-btn {
+    background-color: gold;
+    border: none;
+    color: #1a1a1a;
+    padding: 10px;
+    font-size: 1.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.carousel-btn:hover {
+    opacity: 0.8;
+}

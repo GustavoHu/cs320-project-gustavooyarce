@@ -8,7 +8,7 @@ import Navbar from "./components/Navbar";
 import { Amplify } from "aws-amplify";
 import config from "./amplifyconfiguration.json";
 import Signin_up from "./components/Signin_up";
-
+import Goals from "./components/Goals";
 
 Amplify.configure(config);
 
@@ -21,6 +21,7 @@ root.render(
             <Route path="/" element={<Home />} />
             <Route path="/Board" element={<Board />} />
             <Route path="/Signin_up" element={<Signin_up />} />
+            <Route path="/Goals" element={<Goals />} />
         </Routes>
     </BrowserRouter>
 );

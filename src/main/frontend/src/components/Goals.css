@@ -1,0 +1,131 @@
+/* Goals.css */
+.goals-container {
+    background-color: #1a1a1a;
+    min-height: 100vh;
+    padding: 40px 20px;
+    text-align: center;
+    color: #fff; /* Texto blanco por defecto */
+}
+
+.goals-title {
+    font-size: 2rem;
+    color: gold;
+    margin-bottom: 10px;
+}
+
+.goals-subtitle {
+    font-size: 1rem;
+    color: #ccc;
+    margin-bottom: 30px;
+}
+
+/* Formulario */
+.goals-form {
+    margin: 0 auto 30px auto;
+    max-width: 500px;
+    background-color: #2c2c2c;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: left;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: gold;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background-color: #3b3b3b;
+    color: #fff;
+}
+
+.btn-add-goal {
+    background-color: gold;
+    color: #1a1a1a;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-add-goal:hover {
+    opacity: 0.8;
+}
+
+/* Lista de metas */
+.goals-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.goal-card {
+    background-color: #2c2c2c;
+    padding: 15px;
+    border-radius: 5px;
+    min-width: 250px;
+    max-width: 300px;
+    text-align: left;
+}
+
+.goal-card h3 {
+    font-size: 1.2rem;
+    color: gold;
+    margin-bottom: 8px;
+}
+
+.goal-card p {
+    color: #bbb;
+    margin-bottom: 10px;
+}
+
+.btn-delete-goal {
+    background-color: transparent;
+    border: 1px solid #999;
+    color: #999;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-delete-goal:hover {
+    background-color: #444;
+    border-color: #ccc;
+    color: #ccc;
+}
+
+/* Goals.css - agrega estas reglas al final o adáptalas a tu diseño */
+.upload-section {
+    margin: 30px auto;
+    max-width: 500px;
+    text-align: center;
+    background-color: #2c2c2c;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.upload-section h2 {
+    color: gold;
+    margin-bottom: 10px;
+}
+
+.upload-section input[type="file"] {
+    background-color: #3b3b3b;
+    color: #fff;
+    border: none;
+    padding: 5px;
+    border-radius: 4px;
+}
