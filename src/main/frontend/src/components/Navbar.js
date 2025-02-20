@@ -8,6 +8,8 @@ function Navbar() {
             <Link to="/">Home</Link>
             <span> | </span>
             <Link to="/Board">Board</Link>
+            <span> | </span>
+            <Link to="/Signin_up">Sign In / Sign Up</Link>
         </nav>
     );
 }

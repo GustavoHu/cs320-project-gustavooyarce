@@ -10,6 +10,11 @@
       "StackName": "amplify-cs320projectgustavoo-dev-66439",
       "StackId": "arn:aws:cloudformation:us-west-1:730335528058:stack/amplify-cs320projectgustavoo-dev-66439/213e0c10-d798-11ef-8ef4-0230718136b5",
       "AmplifyAppId": "d3v7lw8rcb23hf"
+    },
+    "categories": {
+      "auth": {
+        "cs320projectgustavoo66771b0d": {}
+      }
     }
   }
 }
