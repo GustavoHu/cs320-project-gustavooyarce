@@ -1,0 +1,38 @@
+/* Navbar.css */
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: black; /* Black background */
+    padding: 10px 20px;
+    width: 100vw; /* Ensures full width */
+    box-sizing: border-box; /* Prevents extra spacing */
+}
+
+
+.navbar-links {
+    display: flex;
+    gap: 25px;
+}
+
+.navbar a {
+    color: gold;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    padding: 8px 12px;
+    border-radius: 5px; /* Rounded links */
+}
+
+.navbar a:hover {
+    background-color: gold;
+    color: black; /* Inverted colors on hover */
+}
+
+.navbar-logo {
+    font-size: 26px;
+    font-weight: bold;
+    color: white;
+    letter-spacing: 1px;
+}

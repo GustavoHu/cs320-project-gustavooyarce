@@ -1,0 +1,138 @@
+/* General Styling */
+body {
+    background-color: #2C2C2C;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+}
+
+/* Container */
+.home-container {
+    text-align: center;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hero Section */
+.hero {
+    padding: 50px 20px;
+    text-align: center;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: gold;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+}
+
+/* Call-to-Action (CTA) Button */
+.cta-button {
+    background-color: gold;
+    color: black;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+    text-decoration: none;  /* Ensures link styling is consistent */
+    display: inline-block;
+}
+
+.cta-button:hover {
+    background-color: white;
+    color: black;
+}
+
+/* TaskFlow Info Section */
+.taskflow-info {
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 60px 20px;
+    background-color: #1a1a1a;
+}
+
+.info-container {
+    display: flex;
+    max-width: 1200px;
+    align-items: center;
+    gap: 20px;
+    padding: 30px;
+    background-color: #1c1c1c;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.info-image img {
+    max-width: 300px;
+    border-radius: 10px;
+}
+
+.info-content {
+    text-align: left;
+    max-width: 500px;
+}
+
+.info-content h2 {
+    font-size: 2rem;
+    color: gold;
+}
+
+.benefits-list {
+    list-style: none;
+    padding: 0;
+}
+
+.benefits-list li {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+/* Key Features Section */
+.key-features {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 60px 20px;
+    background-color: #1a1a1a; /* Darker background for contrast */
+    border-radius: 10px;
+    margin: 40px auto;
+    max-width: 1000px;
+    flex-direction: row-reverse; /* Moves the image to the left */
+}
+
+.features-image img {
+    max-width: 300px;
+    border-radius: 10px;
+}
+
+.features-content {
+    text-align: left;
+    max-width: 500px;
+}
+
+.features-content h2 {
+    font-size: 2rem;
+    color: gold;
+}
+
+/* Responsive for smaller screens */
+@media (max-width: 768px) {
+    .key-features {
+        flex-direction: column;
+        text-align: center;
+    }
+}
