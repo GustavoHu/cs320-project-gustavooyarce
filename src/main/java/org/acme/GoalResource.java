@@ -4,12 +4,14 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.util.List;
 
 @Path("/goals")
+@Produces(MediaType.APPLICATION_JSON)  // <-- Produce JSON
+@Consumes(MediaType.APPLICATION_JSON) // <-- Consume JSON
 public class GoalResource {
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     @Transactional
     public Response createGoal(Goal goal) {
         // Validar que el título no esté vacío
@@ -18,7 +20,6 @@ public class GoalResource {
                     .entity("Title cannot be empty.")
                     .build();
         }
-
         // Validar longitud mínima, etc.
         if (goal.title.length() < 3) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -26,11 +27,34 @@ public class GoalResource {
                     .build();
         }
 
-        // Persistir en DB (si tu Goal extiende PanacheEntity)
+        // Guardar en DB
         goal.persist();
 
-        return Response.ok("Goal created successfully: " + goal.title).build();
+        // Devuelve la meta recién creada como JSON
+        return Response.ok(goal).build();
     }
 
-    // GET, PUT, DELETE, etc. si lo deseas
+    // NUEVO: Devuelve todas las metas
+    @GET
+    public List<Goal> getAllGoals() {
+        return Goal.listAll();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @Transactional
+    public Response deleteGoal(@PathParam("id") Long id) {
+        Goal goal = Goal.findById(id);
+        if (goal == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Goal not found with id: " + id)
+                    .build();
+        }
+
+        goal.delete(); // JPA se encarga de las tareas asociadas
+
+        return Response.ok("Goal deleted with id: " + id).build();
+    }
+
+
 }

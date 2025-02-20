@@ -11,6 +11,8 @@ function Goals() {
 
     const [newTitle, setNewTitle] = useState("");
     const [newDescription, setNewDescription] = useState("");
+    const [newColor, setNewColor] = useState("#FFD700"); // Estado para el color
+
     // Estado para imágenes inspiradoras
     const [images, setImages] = useState([]);
 
@@ -30,46 +32,45 @@ function Goals() {
             alert("Title cannot exceed 150 characters.");
             return;
         }
-
         if (newDescription.length > 150) {
             alert("Description cannot exceed 150 characters.");
             return;
         }
 
-
         try {
+            // Enviamos también el color al backend
             const response = await fetch("http://localhost:8080/goals", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     title: newTitle,
-                    description: newDescription
+                    description: newDescription,
+                    color: newColor
                 })
             });
-            const text = await response.text();
 
-            if (response.status === 400) {
-                alert(text);
+            // Parseamos la respuesta como JSON
+            const createdGoal = await response.json();
+
+            if (!response.ok) {
+                // Si el servidor responde con error (400, etc.)
+                alert(createdGoal);
             } else {
-                alert(text);
+                // Mostramos un mensaje de éxito
+                alert("Goal created successfully: " + createdGoal.title);
 
-                // Agregamos meta al estado local
-                const newGoal = {
-                    id: Date.now(),
-                    title: newTitle,
-                    description: newDescription,
-                };
-                setGoals((prevGoals) => [...prevGoals, newGoal]);
+                // Agregamos la meta con su ID real del backend
+                setGoals((prevGoals) => [...prevGoals, createdGoal]);
 
                 // Limpiamos inputs
                 setNewTitle("");
                 setNewDescription("");
+                setNewColor("#FFD700"); // color por defecto si quieres
             }
         } catch (err) {
             alert("Error contacting server.");
         }
     };
-
 
     const handleDeleteGoal = (id) => {
         setGoals((prevGoals) => prevGoals.filter((goal) => goal.id !== id));
@@ -113,6 +114,17 @@ function Goals() {
                     />
                 </div>
 
+                {/* Nuevo input para el color */}
+                <div className="form-group">
+                    <label htmlFor="goalColor">Color:</label>
+                    <input
+                        id="goalColor"
+                        type="color"
+                        value={newColor}
+                        onChange={(e) => setNewColor(e.target.value)}
+                    />
+                </div>
+
                 <button type="submit" className="btn-add-goal">Add Goal</button>
             </form>
 
@@ -128,10 +140,17 @@ function Goals() {
             {/* Lista de metas */}
             <div className="goals-list">
                 {goals.map((goal) => (
-                    <div key={goal.id} className="goal-card">
+                    <div
+                        key={goal.id}
+                        className="goal-card"
+                        style={{ borderLeft: `8px solid ${goal.color || "#333"}` }}
+                    >
                         <h3>{goal.title}</h3>
                         <p>{goal.description}</p>
-                        <button className="btn-delete-goal" onClick={() => handleDeleteGoal(goal.id)}>
+                        <button
+                            className="btn-delete-goal"
+                            onClick={() => handleDeleteGoal(goal.id)}
+                        >
                             Delete
                         </button>
                     </div>

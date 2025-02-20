@@ -1,83 +1,246 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Board.css";
 
 function Board() {
-    const [tasks, setTasks] = useState({
-        todo: [
-            { id: 1, title: "Set up meeting", description: "Plan for project discussion" },
-            { id: 2, title: "Write report", description: "Summary for client" },
-        ],
-        inProgress: [
-            { id: 3, title: "Develop Home Page", description: "Frontend UI" },
-        ],
-        done: [
-            { id: 4, title: "Research AI tools", description: "Find best integrations" },
-        ],
-    });
+    const [goals, setGoals] = useState([]);
+    const [tasksByGoal, setTasksByGoal] = useState({});
+    const [collapsedGoals, setCollapsedGoals] = useState({}); // para colapsar/expandir
 
-    /**
-     * Se dispara cuando inicias a arrastrar una tarjeta.
-     * Guarda en dataTransfer la columna origen y el ID de la tarea.
-     */
-    const handleDragStart = (event, sourceColumn, taskId) => {
-        const data = { sourceColumn, taskId };
-        // Guardamos la info en el dataTransfer para recuperarla en onDrop
-        event.dataTransfer.setData("application/json", JSON.stringify(data));
+    useEffect(() => {
+        // Cargar metas
+        fetch("http://localhost:8080/goals")
+            .then((res) => res.json())
+            .then((data) => {
+                setGoals(data);
+                // Para cada meta, cargar sus tareas
+                data.forEach((goal) => {
+                    fetch(`http://localhost:8080/tasks?goalId=${goal.id}`)
+                        .then((res) => res.json())
+                        .then((tasks) => {
+                            const todo = tasks.filter((t) => t.status === "todo");
+                            const inProgress = tasks.filter((t) => t.status === "inProgress");
+                            const done = tasks.filter((t) => t.status === "done");
+                            setTasksByGoal((prev) => ({
+                                ...prev,
+                                [goal.id]: { todo, inProgress, done },
+                            }));
+                        })
+                        .catch((err) => console.error(err));
+                });
+            })
+            .catch((err) => console.error(err));
+    }, []);
+
+    // Colapsar/expandir
+    const toggleCollapse = (goalId) => {
+        setCollapsedGoals((prev) => ({
+            ...prev,
+            [goalId]: !prev[goalId],
+        }));
     };
 
-    /**
-     * Se dispara constantemente mientras pasas el mouse por encima de una columna.
-     * Para permitir soltar, necesitamos llamar a event.preventDefault().
-     */
-    const handleDragOver = (event) => {
-        event.preventDefault();
+    // Eliminar meta
+    const handleDeleteGoal = async (goalId) => {
+        try {
+            const res = await fetch(`http://localhost:8080/goals/${goalId}`, {
+                method: "DELETE",
+            });
+            if (!res.ok) {
+                const msg = await res.text();
+                alert(msg);
+                return;
+            }
+            // Si se eliminó en backend, lo removemos de la lista local
+            setGoals((prev) => prev.filter((g) => g.id !== goalId));
+            // También podemos quitar sus tareas de tasksByGoal
+            setTasksByGoal((prev) => {
+                const copy = { ...prev };
+                delete copy[goalId];
+                return copy;
+            });
+        } catch (error) {
+            alert("Error deleting goal.");
+        }
     };
 
-    /**
-     * Se dispara cuando sueltas la tarjeta en una columna destino.
-     * Recuperamos la información del dataTransfer, removemos la tarea de la
-     * columna origen y la insertamos en la columna destino.
-     */
+    return (
+        <div className="board-page-container">
+            <h1>All Goals Boards</h1>
+            {goals.map((goal) => {
+                const goalTasks = tasksByGoal[goal.id] || {
+                    todo: [],
+                    inProgress: [],
+                    done: [],
+                };
+                const isCollapsed = collapsedGoals[goal.id] || false;
+
+                return (
+                    <div
+                        key={goal.id}
+                        className="goal-board"
+                        style={{
+                            border: `2px solid ${goal.color || "#ccc"}`,
+                            marginBottom: "20px",
+                            borderRadius: "8px",
+                            backgroundColor: "#1a1a1a",
+                        }}
+                    >
+                        {/* Encabezado con el título de la meta */}
+                        <div
+                            className="goal-board-header"
+                            style={{
+                                backgroundColor: goal.color || "#333",
+                                padding: "10px",
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                cursor: "pointer",
+                            }}
+                        >
+                            <div onClick={() => toggleCollapse(goal.id)}>
+                                <h2 style={{ color: "#fff" }}>
+                                    {goal.title} (Goal #{goal.id})
+                                </h2>
+                            </div>
+
+                            {/* Botón para eliminar la meta */}
+                            <button
+                                style={{ marginLeft: "auto" }}
+                                onClick={(e) => {
+                                    e.stopPropagation(); // Evita colapsar al hacer clic
+                                    handleDeleteGoal(goal.id);
+                                }}
+                            >
+                                Delete Goal
+                            </button>
+                        </div>
+
+                        {/* Si NO está colapsado, mostramos el tablero */}
+                        {!isCollapsed && (
+                            <div className="goal-board-content" style={{ padding: "10px" }}>
+                                <ColumnsContainer
+                                    goal={goal}
+                                    tasks={goalTasks}
+                                    setTasksByGoal={setTasksByGoal}
+                                />
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
+
+/** Este componente maneja las 3 columnas (To Do, In Progress, Done) y un formulario para crear nuevas tareas */
+function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
+    const [newTaskTitle, setNewTaskTitle] = useState("");
+
     const handleDrop = (event, targetColumn) => {
         event.preventDefault();
         const droppedData = JSON.parse(event.dataTransfer.getData("application/json"));
         const { sourceColumn, taskId } = droppedData;
 
-        // Si se suelta en la misma columna, no hacemos nada
         if (sourceColumn === targetColumn) return;
 
-        setTasks((prevTasks) => {
-            // Copiamos las tareas de la columna origen
-            const sourceTasks = [...prevTasks[sourceColumn]];
-            // Encontramos el índice de la tarea
-            const taskIndex = sourceTasks.findIndex((t) => t.id === taskId);
-            if (taskIndex === -1) return prevTasks; // No encontrado
+        // 1) Actualiza local
+        setTasksByGoal((prev) => {
+            const goalTasks = prev[goal.id];
+            if (!goalTasks) return prev;
 
-            // Sacamos la tarea del array de origen
-            const [movedTask] = sourceTasks.splice(taskIndex, 1);
+            const sourceTasks = [...goalTasks[sourceColumn]];
+            const idx = sourceTasks.findIndex((t) => t.id === taskId);
+            if (idx === -1) return prev;
 
-            // Copiamos las tareas de la columna destino y añadimos la tarea
-            const targetTasks = [...prevTasks[targetColumn], movedTask];
+            const [moved] = sourceTasks.splice(idx, 1);
+            moved.status = targetColumn;
 
-            // Retornamos el nuevo estado con las columnas actualizadas
+            const targetTasks = [...goalTasks[targetColumn], moved];
+
             return {
-                ...prevTasks,
-                [sourceColumn]: sourceTasks,
-                [targetColumn]: targetTasks,
+                ...prev,
+                [goal.id]: {
+                    ...goalTasks,
+                    [sourceColumn]: sourceTasks,
+                    [targetColumn]: targetTasks,
+                },
             };
         });
+
+        // 2) Actualiza en backend
+        fetch(`http://localhost:8080/tasks/${taskId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: targetColumn }),
+        }).catch((err) => console.error(err));
+    };
+
+    const handleDragStart = (event, sourceColumn, taskId) => {
+        const data = { sourceColumn, taskId };
+        event.dataTransfer.setData("application/json", JSON.stringify(data));
+    };
+
+    // Form para crear nueva tarea
+    const handleAddTask = async (e) => {
+        e.preventDefault();
+        if (!newTaskTitle.trim()) {
+            alert("Please enter a task title.");
+            return;
+        }
+
+        try {
+            const res = await fetch("http://localhost:8080/tasks", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title: newTaskTitle,
+                    status: "todo",
+                    goal: { id: goal.id },
+                }),
+            });
+            if (!res.ok) {
+                const msg = await res.text();
+                alert(msg);
+                return;
+            }
+            const createdTask = await res.json();
+
+            // Actualizamos local
+            setTasksByGoal((prev) => {
+                const goalTasks = prev[goal.id] || { todo: [], inProgress: [], done: [] };
+                return {
+                    ...prev,
+                    [goal.id]: {
+                        ...goalTasks,
+                        todo: [...goalTasks.todo, createdTask],
+                    },
+                };
+            });
+
+            setNewTaskTitle("");
+        } catch (err) {
+            alert("Error creating task.");
+        }
     };
 
     return (
-        <div className="board-container">
-            <h1 className="board-title">Task Board</h1>
+        <div>
+            <form onSubmit={handleAddTask} style={{ marginBottom: "10px" }}>
+                <input
+                    type="text"
+                    placeholder="New Task Title"
+                    value={newTaskTitle}
+                    onChange={(e) => setNewTaskTitle(e.target.value)}
+                />
+                <button type="submit">Add Task</button>
+            </form>
+
             <div className="columns-container">
                 <Column
                     title="To Do"
                     columnKey="todo"
                     tasks={tasks.todo}
                     onDragStart={handleDragStart}
-                    onDragOver={handleDragOver}
                     onDrop={handleDrop}
                 />
                 <Column
@@ -85,7 +248,6 @@ function Board() {
                     columnKey="inProgress"
                     tasks={tasks.inProgress}
                     onDragStart={handleDragStart}
-                    onDragOver={handleDragOver}
                     onDrop={handleDrop}
                 />
                 <Column
@@ -93,7 +255,6 @@ function Board() {
                     columnKey="done"
                     tasks={tasks.done}
                     onDragStart={handleDragStart}
-                    onDragOver={handleDragOver}
                     onDrop={handleDrop}
                 />
             </div>
@@ -101,13 +262,13 @@ function Board() {
     );
 }
 
-function Column({ title, columnKey, tasks, onDragStart, onDragOver, onDrop }) {
-    // Al soltar en esta columna, llamamos a onDrop con la key de esta columna
-    const handleDropInThisColumn = (event) => onDrop(event, columnKey);
+function Column({ title, columnKey, tasks, onDragStart, onDrop }) {
+    const handleDragOver = (e) => e.preventDefault();
+    const handleDropInThisColumn = (e) => onDrop(e, columnKey);
 
     return (
-        <div className="column" onDragOver={onDragOver} onDrop={handleDropInThisColumn}>
-            <h2>{title}</h2>
+        <div className="column" onDragOver={handleDragOver} onDrop={handleDropInThisColumn}>
+            <h3>{title}</h3>
             <div className="task-list">
                 {tasks.map((task) => (
                     <TaskCard
@@ -123,9 +284,8 @@ function Column({ title, columnKey, tasks, onDragStart, onDragOver, onDrop }) {
 }
 
 function TaskCard({ task, columnKey, onDragStart }) {
-    // Al iniciar a arrastrar, le decimos a Board qué tarea y qué columna es
-    const handleDragStartCard = (event) => {
-        onDragStart(event, columnKey, task.id);
+    const handleDragStartCard = (e) => {
+        onDragStart(e, columnKey, task.id);
     };
 
     return (
@@ -134,7 +294,7 @@ function TaskCard({ task, columnKey, onDragStart }) {
             draggable="true"
             onDragStart={handleDragStartCard}
         >
-            <h3>{task.title}</h3>
+            <h4>{task.title}</h4>
             <p>{task.description}</p>
         </div>
     );
