@@ -14,20 +14,62 @@ function Goals() {
     // Estado para imágenes inspiradoras
     const [images, setImages] = useState([]);
 
-    const handleAddGoal = (e) => {
+    const handleAddGoal = async (e) => {
         e.preventDefault();
-        if (!newTitle.trim()) return;
 
-        const newGoal = {
-            id: Date.now(),
-            title: newTitle,
-            description: newDescription,
-        };
+        // 1) Validación frontend
+        if (!newTitle.trim()) {
+            alert("Please enter a goal title.");
+            return;
+        }
+        if (newTitle.length < 3) {
+            alert("Title must be at least 3 characters.");
+            return;
+        }
+        if (newTitle.length > 150) {
+            alert("Title cannot exceed 150 characters.");
+            return;
+        }
 
-        setGoals((prevGoals) => [...prevGoals, newGoal]);
-        setNewTitle("");
-        setNewDescription("");
+        if (newDescription.length > 150) {
+            alert("Description cannot exceed 150 characters.");
+            return;
+        }
+
+
+        try {
+            const response = await fetch("http://localhost:8080/goals", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title: newTitle,
+                    description: newDescription
+                })
+            });
+            const text = await response.text();
+
+            if (response.status === 400) {
+                alert(text);
+            } else {
+                alert(text);
+
+                // Agregamos meta al estado local
+                const newGoal = {
+                    id: Date.now(),
+                    title: newTitle,
+                    description: newDescription,
+                };
+                setGoals((prevGoals) => [...prevGoals, newGoal]);
+
+                // Limpiamos inputs
+                setNewTitle("");
+                setNewDescription("");
+            }
+        } catch (err) {
+            alert("Error contacting server.");
+        }
     };
+
 
     const handleDeleteGoal = (id) => {
         setGoals((prevGoals) => prevGoals.filter((goal) => goal.id !== id));
