@@ -4,15 +4,15 @@ import "./Board.css";
 function Board() {
     const [goals, setGoals] = useState([]);
     const [tasksByGoal, setTasksByGoal] = useState({});
-    const [collapsedGoals, setCollapsedGoals] = useState({}); // Para colapsar/expandir
+    const [collapsedGoals, setCollapsedGoals] = useState({});
 
     useEffect(() => {
-        // Cargar metas desde el backend
+        // Load goals from the backend
         fetch("http://localhost:8080/goals")
             .then((res) => res.json())
             .then((data) => {
                 setGoals(data);
-                // Para cada meta, cargar sus tareas
+                // For each goal, load its tasks
                 data.forEach((goal) => {
                     fetch(`http://localhost:8080/tasks?goalId=${goal.id}`)
                         .then((res) => res.json())
@@ -31,7 +31,7 @@ function Board() {
             .catch((err) => console.error(err));
     }, []);
 
-    // Colapsar/expandir la vista de un Goal
+    // Collapse/expand a Goal's view
     const toggleCollapse = (goalId) => {
         setCollapsedGoals((prev) => ({
             ...prev,
@@ -39,7 +39,7 @@ function Board() {
         }));
     };
 
-    // Eliminar meta
+    // Delete a Goal
     const handleDeleteGoal = async (goalId) => {
         try {
             const res = await fetch(`http://localhost:8080/goals/${goalId}`, {
@@ -50,9 +50,9 @@ function Board() {
                 alert(msg);
                 return;
             }
-            // Quita la meta de la lista local
+            // Remove goal locally
             setGoals((prev) => prev.filter((g) => g.id !== goalId));
-            // Quita también sus tareas
+            // Also remove its tasks
             setTasksByGoal((prev) => {
                 const copy = { ...prev };
                 delete copy[goalId];
@@ -65,7 +65,7 @@ function Board() {
 
     return (
         <div className="board-page-container">
-            <h1>All Goals Boards</h1>
+            <h1 className="board-title">All Goals Boards</h1>
             {goals.map((goal) => {
                 const goalTasks = tasksByGoal[goal.id] || {
                     todo: [],
@@ -80,7 +80,7 @@ function Board() {
                         className="goal-board"
                         style={{ borderColor: goal.color || "#ccc" }}
                     >
-                        {/* Encabezado */}
+                        {/* Header */}
                         <div
                             className="goal-board-header"
                             style={{ backgroundColor: goal.color || "#333" }}
@@ -89,12 +89,14 @@ function Board() {
                                 className="goal-board-title"
                                 onClick={() => toggleCollapse(goal.id)}
                             >
-                                <h2>{goal.title} (Goal #{goal.id})</h2>
+                                <h2>
+                                    {goal.title} (Goal #{goal.id})
+                                </h2>
                             </div>
                             <button
                                 className="delete-goal-btn"
                                 onClick={(e) => {
-                                    e.stopPropagation(); // Evita colapsar al hacer clic
+                                    e.stopPropagation(); // Prevent collapse on click
                                     handleDeleteGoal(goal.id);
                                 }}
                             >
@@ -102,7 +104,7 @@ function Board() {
                             </button>
                         </div>
 
-                        {/* Contenido si no está colapsado */}
+                        {/* Content if not collapsed */}
                         {!isCollapsed && (
                             <div className="goal-board-content">
                                 <ColumnsContainer
@@ -119,26 +121,86 @@ function Board() {
     );
 }
 
-/** Maneja las 4 columnas (To Do, In Progress, Done, Delete) y un formulario para crear nuevas tareas */
+/** Handles the 4 columns (To Do, In Progress, Done, Delete) + add/edit tasks */
 function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
     const [newTaskTitle, setNewTaskTitle] = useState("");
 
-    // Manejo de arrastrar y soltar a las columnas
+    // Edit task states (only the title)
+    const [editingTask, setEditingTask] = useState(null);
+    const [editTitle, setEditTitle] = useState("");
+
+    // Start editing a task
+    const startEditingTask = (task) => {
+        setEditingTask(task);
+        setEditTitle(task.title);
+    };
+
+    // Update the task in the backend (PUT) - only updating title
+    const handleUpdateTask = async () => {
+        if (!editingTask) return;
+
+        try {
+            const res = await fetch(`http://localhost:8080/tasks/${editingTask.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title: editTitle,
+                    // keep the same status from editingTask
+                    status: editingTask.status,
+                }),
+            });
+            if (!res.ok) {
+                const msg = await res.text();
+                alert(msg);
+                return;
+            }
+            const updatedTask = await res.json();
+
+            // Update local state
+            setTasksByGoal((prev) => {
+                const goalTasks = prev[goal.id];
+                if (!goalTasks) return prev;
+
+                // We have three columns: todo, inProgress, done
+                const columns = ["todo", "inProgress", "done"];
+                const newState = { ...goalTasks };
+
+                // Replace the updated task in whichever column it was
+                for (let col of columns) {
+                    newState[col] = newState[col].map((t) =>
+                        t.id === updatedTask.id ? updatedTask : t
+                    );
+                }
+
+                return {
+                    ...prev,
+                    [goal.id]: newState,
+                };
+            });
+
+            // Clear editing states
+            setEditingTask(null);
+            setEditTitle("");
+            alert("Task updated successfully.");
+        } catch (error) {
+            alert("Error updating task.");
+        }
+    };
+
+    // Handle drag & drop to move or delete tasks
     const handleDrop = (event, targetColumn) => {
         event.preventDefault();
         const droppedData = JSON.parse(event.dataTransfer.getData("application/json"));
         const { sourceColumn, taskId } = droppedData;
 
-        // Si la tarea se suelta en la misma columna y no es la de "delete", no hacemos nada
         if (sourceColumn === targetColumn && targetColumn !== "delete") return;
 
         if (targetColumn === "delete") {
-            // 1) Eliminar del estado local
+            // Remove from local state
             setTasksByGoal((prev) => {
                 const goalTasks = prev[goal.id];
                 if (!goalTasks) return prev;
 
-                // Remover la tarea de las 3 columnas
                 const newTodo = goalTasks.todo.filter((t) => t.id !== taskId);
                 const newInProgress = goalTasks.inProgress.filter((t) => t.id !== taskId);
                 const newDone = goalTasks.done.filter((t) => t.id !== taskId);
@@ -153,12 +215,12 @@ function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
                 };
             });
 
-            // 2) Eliminar en backend
+            // Delete from backend
             fetch(`http://localhost:8080/tasks/${taskId}`, {
                 method: "DELETE",
             }).catch((err) => console.error(err));
         } else {
-            // Mover tarea a otra columna (To Do, In Progress, Done)
+            // Move task to another column
             setTasksByGoal((prev) => {
                 const goalTasks = prev[goal.id];
                 if (!goalTasks) return prev;
@@ -182,7 +244,7 @@ function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
                 };
             });
 
-            // Actualizar en backend (PUT)
+            // Update status in backend
             fetch(`http://localhost:8080/tasks/${taskId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -196,7 +258,7 @@ function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
         event.dataTransfer.setData("application/json", JSON.stringify(data));
     };
 
-    // Crear nueva tarea
+    // Create a new task (title only)
     const handleAddTask = async (e) => {
         e.preventDefault();
         if (!newTaskTitle.trim()) {
@@ -221,7 +283,7 @@ function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
             }
             const createdTask = await res.json();
 
-            // Actualizamos local
+            // Update local state
             setTasksByGoal((prev) => {
                 const goalTasks = prev[goal.id] || { todo: [], inProgress: [], done: [] };
                 return {
@@ -241,6 +303,7 @@ function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
 
     return (
         <div>
+            {/* Form to add a new task */}
             <form className="task-form" onSubmit={handleAddTask}>
                 <input
                     className="task-input"
@@ -254,6 +317,32 @@ function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
                 </button>
             </form>
 
+            {/* Edit Task Form (only if editingTask != null) */}
+            {editingTask && (
+                <div className="edit-task-form">
+                    <h3>Edit Task</h3>
+                    <input
+                        type="text"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        placeholder="Task Title"
+                        className="edit-task-input"
+                    />
+                    <div className="edit-buttons">
+                        <button onClick={handleUpdateTask}>Save</button>
+                        <button
+                            onClick={() => {
+                                setEditingTask(null);
+                                setEditTitle("");
+                            }}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Columns */}
             <div className="columns-container">
                 <Column
                     title="To Do"
@@ -261,6 +350,7 @@ function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
                     tasks={tasks.todo}
                     onDragStart={handleDragStart}
                     onDrop={handleDrop}
+                    onEditTask={startEditingTask}
                 />
                 <Column
                     title="In Progress"
@@ -268,6 +358,7 @@ function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
                     tasks={tasks.inProgress}
                     onDragStart={handleDragStart}
                     onDrop={handleDrop}
+                    onEditTask={startEditingTask}
                 />
                 <Column
                     title="Done"
@@ -275,6 +366,7 @@ function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
                     tasks={tasks.done}
                     onDragStart={handleDragStart}
                     onDrop={handleDrop}
+                    onEditTask={startEditingTask}
                 />
                 <DeleteColumn onDragStart={handleDragStart} onDrop={handleDrop} />
             </div>
@@ -282,8 +374,7 @@ function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
     );
 }
 
-/* Columna genérica */
-function Column({ title, columnKey, tasks, onDragStart, onDrop }) {
+function Column({ title, columnKey, tasks, onDragStart, onDrop, onEditTask }) {
     const handleDragOver = (e) => e.preventDefault();
 
     const handleDropInThisColumn = (e) => {
@@ -300,6 +391,7 @@ function Column({ title, columnKey, tasks, onDragStart, onDrop }) {
                         task={task}
                         columnKey={columnKey}
                         onDragStart={onDragStart}
+                        onEditTask={onEditTask}
                     />
                 ))}
             </div>
@@ -307,7 +399,6 @@ function Column({ title, columnKey, tasks, onDragStart, onDrop }) {
     );
 }
 
-/* Nueva Columna especial para "Delete" */
 function DeleteColumn({ onDragStart, onDrop }) {
     const handleDragOver = (e) => e.preventDefault();
 
@@ -316,18 +407,13 @@ function DeleteColumn({ onDragStart, onDrop }) {
     };
 
     return (
-        <div
-            className="delete-column"
-            onDragOver={handleDragOver}
-            onDrop={handleDropInThisColumn}
-        >
+        <div className="delete-column" onDragOver={handleDragOver} onDrop={handleDropInThisColumn}>
             <h3 className="column-title">Delete</h3>
         </div>
     );
 }
 
-/* Tarjeta de tarea */
-function TaskCard({ task, columnKey, onDragStart }) {
+function TaskCard({ task, columnKey, onDragStart, onEditTask }) {
     const handleDragStartCard = (e) => {
         onDragStart(e, columnKey, task.id);
     };
@@ -335,7 +421,7 @@ function TaskCard({ task, columnKey, onDragStart }) {
     return (
         <div className="task-card" draggable="true" onDragStart={handleDragStartCard}>
             <h4>{task.title}</h4>
-            <p>{task.description}</p>
+            <button onClick={() => onEditTask(task)}>Edit</button>
         </div>
     );
 }

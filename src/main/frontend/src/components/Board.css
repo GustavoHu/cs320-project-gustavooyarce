@@ -1,274 +1,256 @@
-    .board-container {
-        text-align: center;
-        padding: 40px 20px;
-        background-color: #1a1a1a;
-        min-height: 100vh;
-    }
+.board-container {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: #1a1a1a;
+    min-height: 100vh;
+}
 
-    .board-title {
-        font-size: 2.5rem;
-        color: gold;
-        margin-bottom: 20px;
-    }
+/* Main title */
+.board-title {
+    font-size: 2.5rem;
+    color: gold;
+    margin-bottom: 20px;
+}
 
-    .columns-container {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        flex-wrap: wrap;
-    }
+/* Container for all columns */
+.columns-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
 
-    .column {
-        background-color: #2C2C2C;
-        padding: 20px;
-        border-radius: 8px;
-        min-width: 250px;
-        max-width: 300px;
-        flex-grow: 1;
-    }
+/* Individual column */
+.column {
+    background-color: #2C2C2C;
+    padding: 20px;
+    border-radius: 8px;
+    min-width: 250px;
+    max-width: 300px;
+    flex-grow: 1;
+}
 
-    .column h2 {
-        color: gold;
-        font-size: 1.5rem;
-        margin-bottom: 15px;
-    }
+.column h2 {
+    color: gold;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
 
-    .task-list {
-        /* optional: extra styling */
-    }
+/* Task list inside each column */
+.task-list {
+    /* optional: extra styling */
+}
 
-    .task-card {
-        background-color: #333;
-        padding: 15px;
-        border-radius: 5px;
-        margin-bottom: 10px;
-        box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
-        cursor: grab; /* Opcional para indicar que se puede arrastrar */
-    }
+/* Task card */
+.task-card {
+    background-color: #333;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+    cursor: grab; /* Optional: indicates that the task is draggable */
+}
 
-    .task-card h3 {
-        font-size: 1.2rem;
-        color: white;
-        margin-bottom: 5px;
-    }
+.task-card h3 {
+    font-size: 1.2rem;
+    color: white;
+    margin-bottom: 5px;
+}
 
-    .task-card p {
-        font-size: 1rem;
-        color: #bbb;
-    }
+.task-card p {
+    font-size: 1rem;
+    color: #bbb;
+}
 
-    /* Contenedor principal de la vista Board */
-    .board-container {
-        text-align: center;
-        padding: 40px 20px;
-        background-color: #1a1a1a;
-        min-height: 100vh;
-    }
+/* ========== STYLES FOR MULTIPLE GOALS STRUCTURE ========== */
 
-    /* Título principal */
-    .board-title {
-        font-size: 2.5rem;
-        color: gold;
-        margin-bottom: 20px;
-    }
+/* Main container for the Board page */
+.board-page-container {
+    padding: 20px;
+    background-color: #1a1a1a; /* You already have this in .board-container, decide whether to use one or the other */
+    min-height: 100vh;
+    color: #fff;
+}
 
-    /* Contenedor de columnas (en tu versión anterior) */
-    .columns-container {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        flex-wrap: wrap;
-    }
+/* Container for each goal */
+.goal-board {
+    border: 2px solid #ccc; /* Dynamically adjusted via style */
+    background-color: #1a1a1a; /* Dynamically adjusted as well */
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
 
-    /* Columna individual */
-    .column {
-        background-color: #2C2C2C;
-        padding: 20px;
-        border-radius: 8px;
-        min-width: 250px;
-        max-width: 300px;
-        flex-grow: 1;
-    }
+/* Header of each goal */
+.goal-board-header {
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer; /* Enables collapsing */
+}
 
-    .column h2 {
-        color: gold;
-        font-size: 1.5rem;
-        margin-bottom: 15px;
-    }
+/* Goal title */
+.goal-board-title {
+    margin-right: auto;
+}
 
-    /* Lista de tareas dentro de cada columna */
-    .task-list {
-        /* optional: extra styling */
-    }
+.goal-board-title h2 {
+    margin: 0;
+    color: #fff;
+}
 
-    /* Tarjeta de tarea */
-    .task-card {
-        background-color: #333;
-        padding: 15px;
-        border-radius: 5px;
-        margin-bottom: 10px;
-        box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
-        cursor: grab; /* Opcional para indicar que se puede arrastrar */
-    }
+/* Delete goal button */
+.delete-goal-btn {
+    background-color: red;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
 
-    .task-card h3 {
-        font-size: 1.2rem;
-        color: white;
-        margin-bottom: 5px;
-    }
+.delete-goal-btn:hover {
+    opacity: 0.8;
+}
 
-    .task-card p {
-        font-size: 1rem;
-        color: #bbb;
-    }
+/* Internal content of the goal board */
+.goal-board-content {
+    padding: 10px;
+}
 
-    /* ========== ESTILOS PARA LA NUEVA ESTRUCTURA DE MÚLTIPLES METAS ========== */
+/* Form for adding tasks */
+.task-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
 
-    /* Contenedor de toda la página Board (puedes unificar con .board-container si quieres) */
-    .board-page-container {
-        padding: 20px;
-        background-color: #1a1a1a; /* ya lo tienes en .board-container, decide si usas uno u otro */
-        min-height: 100vh;
-        color: #fff;
-    }
+.task-input {
+    flex: 1;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #333;
+    background-color: #2c2c2c;
+    color: #fff;
+}
 
-    /* Contenedor de cada meta (Goal) */
-    .goal-board {
-        border: 2px solid #ccc; /* Se ajusta dinámicamente con style */
-        background-color: #1a1a1a; /* Se ajusta dinámicamente también */
-        margin-bottom: 20px;
-        border-radius: 8px;
-    }
+.btn-add-task {
+    background-color: gold;
+    color: #1a1a1a;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
 
-    /* Encabezado de cada meta */
-    .goal-board-header {
-        padding: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer; /* para el colapso */
-    }
+.btn-add-task:hover {
+    opacity: 0.8;
+}
 
-    /* Título de la meta */
-    .goal-board-title {
-        margin-right: auto;
-    }
+/* Container for the three columns (To Do, In Progress, Done) */
+.columns-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: nowrap; /* Prevents line breaks */
+}
 
-    .goal-board-title h2 {
-        margin: 0;
-        color: #fff;
-    }
+/* Column in the new structure */
+.column {
+    flex: 1;
+    background-color: #2c2c2c;
+    border-radius: 8px;
+    padding: 10px;
+    min-width: 200px; /* Adjust as needed */
+}
 
-    /* Botón para eliminar meta */
-    .delete-goal-btn {
-        background-color: red;
-        color: #fff;
-        border: none;
-        padding: 6px 12px;
-        border-radius: 4px;
-        cursor: pointer;
-    }
+.column-title {
+    color: gold;
+    margin-bottom: 10px;
+}
 
-    .delete-goal-btn:hover {
-        opacity: 0.8;
-    }
+.task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-    /* Contenido interno del tablero de la meta */
-    .goal-board-content {
-        padding: 10px;
-    }
+/* Task card in the new structure */
+.task-card {
+    background-color: #333;
+    border: 1px solid #444;
+    border-radius: 5px;
+    padding: 10px;
+    color: #fff;
+    cursor: grab;
+}
 
-    /* Formulario para añadir tarea */
-    .task-form {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
-    }
+/* Delete column */
+.delete-column {
+    /* Prevents it from taking up all the space like the other columns */
+    width: 100px;           /* Fixed width, adjust as needed */
+    height: 120px;          /* Fixed height, adjust as needed */
+    background-color: #990000;
+    border: 2px solid red;
+    border-radius: 8px;
 
-    .task-input {
-        flex: 1;
-        padding: 8px;
-        border-radius: 4px;
-        border: 1px solid #333;
-        background-color: #2c2c2c;
-        color: #fff;
-    }
+    /* Centers vertically/horizontally within the containing row */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 
-    .btn-add-task {
-        background-color: gold;
-        color: #1a1a1a;
-        padding: 8px 16px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
+    /* If using a .columns-container with display:flex,
+       margin: auto can help center it horizontally */
+    margin: 0 auto;
+}
 
-    .btn-add-task:hover {
-        opacity: 0.8;
-    }
+.delete-instructions {
+    color: #fff;
+    font-size: 0.9rem;
+    text-align: center;
+    margin: 0;
+}
 
-    /* Contenedor de las 3 columnas (To Do, In Progress, Done) */
-    .columns-container {
-        display: flex;
-        gap: 20px;
-        flex-wrap: nowrap; /* si quieres que no se rompa línea */
-    }
+/* Edit Task Form Styling */
+.edit-task-form {
+    background-color: #2c2c2c;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 8px;
+    text-align: left;
+    max-width: 400px; /* adjust as needed */
+}
 
-    /* Ajusta según quieras mezclar con tu .columns-container existente */
+.edit-task-form h3 {
+    color: gold;
+    margin-bottom: 10px;
+}
 
-    /* Columna en la nueva estructura */
-    .column {
-        flex: 1;
-        background-color: #2c2c2c;
-        border-radius: 8px;
-        padding: 10px;
-        min-width: 200px; /* ajusta a tu gusto */
-    }
+.edit-task-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background-color: #3b3b3b;
+    color: #fff;
+    margin-bottom: 10px;
+}
 
-    .column-title {
-        color: gold;
-        margin-bottom: 10px;
-    }
+.edit-buttons {
+    display: flex;
+    gap: 10px;
+}
 
-    .task-list {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
+.edit-buttons button {
+    background-color: gold;
+    color: #1a1a1a;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
 
-    /* Tarjeta de tarea en la nueva estructura */
-    .task-card {
-        background-color: #333;
-        border: 1px solid #444;
-        border-radius: 5px;
-        padding: 10px;
-        color: #fff;
-        cursor: grab;
-    }
-
-    .delete-column {
-        /* Prevents it from taking up all the space like the other columns */
-        width: 100px;           /* Fixed width, adjust as needed */
-        height: 120px;          /* Fixed height, adjust as needed */
-        background-color: #990000;
-        border: 2px solid red;
-        border-radius: 8px;
-
-        /* Centers vertically/horizontally within the containing row */
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-
-        /* If using a .columns-container with display:flex,
-           margin: auto can help center it horizontally */
-        margin: 0 auto;
-    }
-
-    .delete-instructions {
-        color: #fff;
-        font-size: 0.9rem;
-        text-align: center;
-        margin: 0;
-    }
-
+.edit-buttons button:hover {
+    opacity: 0.8;
+}

@@ -56,5 +56,33 @@ public class GoalResource {
         return Response.ok("Goal deleted with id: " + id).build();
     }
 
+    @PUT
+    @Path("/{id}")
+    @Transactional
+    public Response updateGoal(@PathParam("id") Long id, Goal updatedGoal) {
+        Goal goal = Goal.findById(id);
+        if (goal == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Goal not found with id: " + id)
+                    .build();
+        }
+
+        // Update only the fields that are provided in the request
+        if (updatedGoal.title != null && !updatedGoal.title.trim().isEmpty()) {
+            goal.title = updatedGoal.title;
+        }
+        if (updatedGoal.description != null) {
+            goal.description = updatedGoal.description;
+        }
+        if (updatedGoal.color != null) {
+            goal.color = updatedGoal.color;
+        }
+
+        // If needed, you can also update due_date here
+
+        return Response.ok(goal).build();
+    }
+
+
 
 }

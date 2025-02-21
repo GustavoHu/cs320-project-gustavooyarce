@@ -1,25 +1,40 @@
-// Goals.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Goals.css";
 import PhotoCarousel from "./PhotoCarousel";
 
 function Goals() {
-    const [goals, setGoals] = useState([
-        { id: 1, title: "Finish React Course", description: "Complete the online course this month." },
-        { id: 2, title: "Plan Summer Vacation", description: "Research and book flights." },
-    ]);
+    // State to store goals fetched from the backend
+    const [goals, setGoals] = useState([]);
 
+    // States for creating a new goal
     const [newTitle, setNewTitle] = useState("");
     const [newDescription, setNewDescription] = useState("");
-    const [newColor, setNewColor] = useState("#FFD700"); // Estado para el color
+    const [newColor, setNewColor] = useState("#FFD700");
 
-    // Estado para imágenes inspiradoras
+    // States for editing an existing goal
+    const [editingGoal, setEditingGoal] = useState(null);
+    const [editTitle, setEditTitle] = useState("");
+    const [editDescription, setEditDescription] = useState("");
+    const [editColor, setEditColor] = useState("#FFD700");
+
+    // State for uploading inspirational images
     const [images, setImages] = useState([]);
 
+    // 1) Fetch all goals from the backend on component mount
+    useEffect(() => {
+        fetch("http://localhost:8080/goals")
+            .then((res) => res.json())
+            .then((data) => {
+                setGoals(data);
+            })
+            .catch((err) => console.error("Error fetching goals:", err));
+    }, []);
+
+    // 2) Handle creating a new goal (POST)
     const handleAddGoal = async (e) => {
         e.preventDefault();
 
-        // 1) Validación frontend
+        // Basic frontend validations
         if (!newTitle.trim()) {
             alert("Please enter a goal title.");
             return;
@@ -38,7 +53,6 @@ function Goals() {
         }
 
         try {
-            // Enviamos también el color al backend
             const response = await fetch("http://localhost:8080/goals", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -49,38 +63,101 @@ function Goals() {
                 })
             });
 
-            // Parseamos la respuesta como JSON
             const createdGoal = await response.json();
 
             if (!response.ok) {
-                // Si el servidor responde con error (400, etc.)
+                // If the server responded with an error
                 alert(createdGoal);
             } else {
-                // Mostramos un mensaje de éxito
                 alert("Goal created successfully: " + createdGoal.title);
-
-                // Agregamos la meta con su ID real del backend
-                setGoals((prevGoals) => [...prevGoals, createdGoal]);
-
-                // Limpiamos inputs
+                // Add the newly created goal to local state
+                setGoals((prev) => [...prev, createdGoal]);
+                // Clear input fields
                 setNewTitle("");
                 setNewDescription("");
-                setNewColor("#FFD700"); // color por defecto si quieres
+                setNewColor("#FFD700");
             }
         } catch (err) {
             alert("Error contacting server.");
         }
     };
 
-    const handleDeleteGoal = (id) => {
-        setGoals((prevGoals) => prevGoals.filter((goal) => goal.id !== id));
+    // 3) Handle deleting a goal (DELETE)
+    const handleDeleteGoal = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:8080/goals/${id}`, {
+                method: "DELETE"
+            });
+
+            if (!response.ok) {
+                const msg = await response.text();
+                alert(msg);
+                return;
+            }
+
+            // Remove the goal from local state
+            setGoals((prevGoals) => prevGoals.filter((goal) => goal.id !== id));
+            alert("Goal deleted successfully.");
+        } catch (err) {
+            alert("Error deleting goal.");
+        }
     };
 
-    // Manejo de la subida de imágenes
+    // 4) Start editing a goal: fill edit states
+    const startEditingGoal = (goal) => {
+        setEditingGoal(goal);
+        setEditTitle(goal.title);
+        setEditDescription(goal.description || "");
+        setEditColor(goal.color || "#FFD700");
+    };
+
+    // 5) Handle updating a goal (PUT)
+    const handleUpdateGoal = async () => {
+        if (!editingGoal) return;
+
+        try {
+            const response = await fetch(
+                `http://localhost:8080/goals/${editingGoal.id}`,
+                {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        title: editTitle,
+                        description: editDescription,
+                        color: editColor
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                const msg = await response.text();
+                alert(msg);
+                return;
+            }
+
+            const updatedGoal = await response.json();
+
+            // Update the local goals list
+            setGoals((prevGoals) =>
+                prevGoals.map((g) => (g.id === updatedGoal.id ? updatedGoal : g))
+            );
+
+            // Clear editing states
+            setEditingGoal(null);
+            setEditTitle("");
+            setEditDescription("");
+            setEditColor("#FFD700");
+
+            alert("Goal updated successfully.");
+        } catch (err) {
+            alert("Error updating goal.");
+        }
+    };
+
+    // 6) Handle image upload (local feature)
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Crear una URL temporal para mostrar la imagen
             const imageUrl = URL.createObjectURL(file);
             setImages((prevImages) => [...prevImages, imageUrl]);
         }
@@ -91,7 +168,7 @@ function Goals() {
             <h1 className="goals-title">My Goals</h1>
             <p className="goals-subtitle">Keep track of your objectives and stay motivated!</p>
 
-            {/* Formulario para agregar metas */}
+            {/* Form to add a new goal */}
             <form className="goals-form" onSubmit={handleAddGoal}>
                 <div className="form-group">
                     <label htmlFor="goalTitle">Goal Title:</label>
@@ -114,7 +191,6 @@ function Goals() {
                     />
                 </div>
 
-                {/* Nuevo input para el color */}
                 <div className="form-group">
                     <label htmlFor="goalColor">Color:</label>
                     <input
@@ -128,16 +204,41 @@ function Goals() {
                 <button type="submit" className="btn-add-goal">Add Goal</button>
             </form>
 
-            {/* Sección para subir imágenes */}
+            {/* Section to upload inspirational photos */}
             <div className="upload-section">
                 <h2>Upload Inspirational Photo</h2>
                 <input type="file" accept="image/*" onChange={handleImageUpload} />
             </div>
 
-            {/* Carrusel de imágenes */}
+            {/* Photo carousel */}
             <PhotoCarousel images={images} />
 
-            {/* Lista de metas */}
+            {/* Edit Goal Form (only visible when editingGoal is not null) */}
+            {editingGoal && (
+                <div className="edit-goal-form">
+                    <h2>Edit Goal</h2>
+                    <input
+                        type="text"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        placeholder="Edit Title"
+                    />
+                    <textarea
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                        placeholder="Edit Description"
+                    />
+                    <input
+                        type="color"
+                        value={editColor}
+                        onChange={(e) => setEditColor(e.target.value)}
+                    />
+                    <button onClick={handleUpdateGoal}>Save Changes</button>
+                    <button onClick={() => setEditingGoal(null)}>Cancel</button>
+                </div>
+            )}
+
+            {/* List of existing goals */}
             <div className="goals-list">
                 {goals.map((goal) => (
                     <div
@@ -152,6 +253,9 @@ function Goals() {
                             onClick={() => handleDeleteGoal(goal.id)}
                         >
                             Delete
+                        </button>
+                        <button onClick={() => startEditingGoal(goal)}>
+                            Edit
                         </button>
                     </div>
                 ))}
