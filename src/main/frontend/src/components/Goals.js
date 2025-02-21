@@ -3,24 +3,19 @@ import "./Goals.css";
 import PhotoCarousel from "./PhotoCarousel";
 
 function Goals() {
-    // State to store goals fetched from the backend
     const [goals, setGoals] = useState([]);
-
-    // States for creating a new goal
     const [newTitle, setNewTitle] = useState("");
     const [newDescription, setNewDescription] = useState("");
     const [newColor, setNewColor] = useState("#FFD700");
 
-    // States for editing an existing goal
     const [editingGoal, setEditingGoal] = useState(null);
     const [editTitle, setEditTitle] = useState("");
     const [editDescription, setEditDescription] = useState("");
     const [editColor, setEditColor] = useState("#FFD700");
 
-    // State for uploading inspirational images
     const [images, setImages] = useState([]);
 
-    // 1) Fetch all goals from the backend on component mount
+    // 1) Cargar metas al montar el componente
     useEffect(() => {
         fetch("http://localhost:8080/goals")
             .then((res) => res.json())
@@ -30,28 +25,36 @@ function Goals() {
             .catch((err) => console.error("Error fetching goals:", err));
     }, []);
 
-    // 2) Handle creating a new goal (POST)
+    // 2) Crear nueva meta (POST) con validaciones locales
     const handleAddGoal = async (e) => {
         e.preventDefault();
 
-        // Basic frontend validations
-        if (!newTitle.trim()) {
+        // --- Validaciones en el Frontend ---
+        const trimmedTitle = newTitle.trim();
+        const trimmedDescription = newDescription.trim();
+
+        // Título no vacío
+        if (!trimmedTitle) {
             alert("Please enter a goal title.");
             return;
         }
-        if (newTitle.length < 3) {
+        // Mínimo 3 caracteres
+        if (trimmedTitle.length < 3) {
             alert("Title must be at least 3 characters.");
             return;
         }
-        if (newTitle.length > 150) {
+        // Máximo 150 caracteres
+        if (trimmedTitle.length > 150) {
             alert("Title cannot exceed 150 characters.");
             return;
         }
-        if (newDescription.length > 150) {
+        // Descripción máximo 150 caracteres
+        if (trimmedDescription.length > 150) {
             alert("Description cannot exceed 150 characters.");
             return;
         }
 
+        // --- Llamada al servidor ---
         try {
             const response = await fetch("http://localhost:8080/goals", {
                 method: "POST",
@@ -59,43 +62,44 @@ function Goals() {
                 body: JSON.stringify({
                     title: newTitle,
                     description: newDescription,
-                    color: newColor
-                })
+                    color: newColor,
+                }),
             });
 
-            const createdGoal = await response.json();
-
+            // Si el servidor envía un error, lo leemos y mostramos
             if (!response.ok) {
-                // If the server responded with an error
-                alert(createdGoal);
-            } else {
-                alert("Goal created successfully: " + createdGoal.title);
-                // Add the newly created goal to local state
-                setGoals((prev) => [...prev, createdGoal]);
-                // Clear input fields
-                setNewTitle("");
-                setNewDescription("");
-                setNewColor("#FFD700");
+                const errorText = await response.text();
+                alert(errorText);
+                return;
             }
+
+            // Si todo va bien, parseamos la respuesta y actualizamos estado
+            const createdGoal = await response.json();
+            alert("Goal created successfully: " + createdGoal.title);
+
+            // Agregamos la meta creada al estado local
+            setGoals((prev) => [...prev, createdGoal]);
+
+            // Reseteamos los campos del formulario
+            setNewTitle("");
+            setNewDescription("");
+            setNewColor("#FFD700");
         } catch (err) {
             alert("Error contacting server.");
         }
     };
 
-    // 3) Handle deleting a goal (DELETE)
+    // 3) Borrar meta (DELETE)
     const handleDeleteGoal = async (id) => {
         try {
             const response = await fetch(`http://localhost:8080/goals/${id}`, {
-                method: "DELETE"
+                method: "DELETE",
             });
-
             if (!response.ok) {
                 const msg = await response.text();
                 alert(msg);
                 return;
             }
-
-            // Remove the goal from local state
             setGoals((prevGoals) => prevGoals.filter((goal) => goal.id !== id));
             alert("Goal deleted successfully.");
         } catch (err) {
@@ -103,7 +107,7 @@ function Goals() {
         }
     };
 
-    // 4) Start editing a goal: fill edit states
+    // Iniciar edición de meta
     const startEditingGoal = (goal) => {
         setEditingGoal(goal);
         setEditTitle(goal.title);
@@ -111,9 +115,30 @@ function Goals() {
         setEditColor(goal.color || "#FFD700");
     };
 
-    // 5) Handle updating a goal (PUT)
+    // 4) Actualizar meta (PUT) con validaciones similares
     const handleUpdateGoal = async () => {
         if (!editingGoal) return;
+
+        const trimmedTitle = editTitle.trim();
+        const trimmedDescription = editDescription.trim();
+
+        // Validaciones locales
+        if (!trimmedTitle) {
+            alert("Please enter a goal title.");
+            return;
+        }
+        if (trimmedTitle.length < 3) {
+            alert("Title must be at least 3 characters.");
+            return;
+        }
+        if (trimmedTitle.length > 150) {
+            alert("Title cannot exceed 150 characters.");
+            return;
+        }
+        if (trimmedDescription.length > 150) {
+            alert("Description cannot exceed 150 characters.");
+            return;
+        }
 
         try {
             const response = await fetch(
@@ -124,8 +149,8 @@ function Goals() {
                     body: JSON.stringify({
                         title: editTitle,
                         description: editDescription,
-                        color: editColor
-                    })
+                        color: editColor,
+                    }),
                 }
             );
 
@@ -137,24 +162,21 @@ function Goals() {
 
             const updatedGoal = await response.json();
 
-            // Update the local goals list
             setGoals((prevGoals) =>
                 prevGoals.map((g) => (g.id === updatedGoal.id ? updatedGoal : g))
             );
 
-            // Clear editing states
             setEditingGoal(null);
             setEditTitle("");
             setEditDescription("");
             setEditColor("#FFD700");
-
             alert("Goal updated successfully.");
         } catch (err) {
             alert("Error updating goal.");
         }
     };
 
-    // 6) Handle image upload (local feature)
+    // 5) Subir imágenes inspiracionales (solo local)
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -166,9 +188,11 @@ function Goals() {
     return (
         <div className="goals-container">
             <h1 className="goals-title">My Goals</h1>
-            <p className="goals-subtitle">Keep track of your objectives and stay motivated!</p>
+            <p className="goals-subtitle">
+                Keep track of your objectives and stay motivated!
+            </p>
 
-            {/* Form to add a new goal */}
+            {/* Formulario para agregar una nueva meta */}
             <form className="goals-form" onSubmit={handleAddGoal}>
                 <div className="form-group">
                     <label htmlFor="goalTitle">Goal Title:</label>
@@ -201,10 +225,12 @@ function Goals() {
                     />
                 </div>
 
-                <button type="submit" className="btn-add-goal">Add Goal</button>
+                <button type="submit" className="btn-add-goal">
+                    Add Goal
+                </button>
             </form>
 
-            {/* Section to upload inspirational photos */}
+            {/* Sección para subir fotos inspiracionales */}
             <div className="upload-section">
                 <h2>Upload Inspirational Photo</h2>
                 <input type="file" accept="image/*" onChange={handleImageUpload} />
@@ -213,7 +239,7 @@ function Goals() {
             {/* Photo carousel */}
             <PhotoCarousel images={images} />
 
-            {/* Edit Goal Form (only visible when editingGoal is not null) */}
+            {/* Formulario de edición (solo visible cuando editingGoal no es null) */}
             {editingGoal && (
                 <div className="edit-goal-form">
                     <h2>Edit Goal</h2>
@@ -238,7 +264,7 @@ function Goals() {
                 </div>
             )}
 
-            {/* List of existing goals */}
+            {/* Lista de metas existentes */}
             <div className="goals-list">
                 {goals.map((goal) => (
                     <div
@@ -254,9 +280,7 @@ function Goals() {
                         >
                             Delete
                         </button>
-                        <button onClick={() => startEditingGoal(goal)}>
-                            Edit
-                        </button>
+                        <button onClick={() => startEditingGoal(goal)}>Edit</button>
                     </div>
                 ))}
             </div>

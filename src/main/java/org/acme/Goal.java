@@ -12,7 +12,10 @@ public class Goal extends PanacheEntity {
     public String description;
     public String color;
 
-    @OneToMany(mappedBy = "goal", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "goal",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER) // <-- EAGER para evitar LazyInitializationException
     @JsonManagedReference
     public List<Task> tasks;
 }

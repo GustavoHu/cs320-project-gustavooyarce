@@ -1,95 +1,57 @@
-.board-container {
-    text-align: center;
+/* ====================================== */
+/* CONTENEDOR PRINCIPAL DE LA PÁGINA      */
+/* ====================================== */
+.board-page-container {
     padding: 40px 20px;
     background-color: #1a1a1a;
     min-height: 100vh;
+    color: #fff;
+    text-align: center;
 }
 
-/* Main title */
+/* Título principal */
 .board-title {
     font-size: 2.5rem;
     color: gold;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
 }
 
-/* Container for all columns */
-.columns-container {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-/* Individual column */
-.column {
-    background-color: #2C2C2C;
-    padding: 20px;
-    border-radius: 8px;
-    min-width: 250px;
-    max-width: 300px;
-    flex-grow: 1;
-}
-
-.column h2 {
-    color: gold;
-    font-size: 1.5rem;
-    margin-bottom: 15px;
-}
-
-/* Task list inside each column */
-.task-list {
-    /* optional: extra styling */
-}
-
-/* Task card */
-.task-card {
-    background-color: #333;
-    padding: 15px;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
-    cursor: grab; /* Optional: indicates that the task is draggable */
-}
-
-.task-card h3 {
-    font-size: 1.2rem;
-    color: white;
-    margin-bottom: 5px;
-}
-
-.task-card p {
-    font-size: 1rem;
-    color: #bbb;
-}
-
-/* ========== STYLES FOR MULTIPLE GOALS STRUCTURE ========== */
-
-/* Main container for the Board page */
-.board-page-container {
-    padding: 20px;
-    background-color: #1a1a1a; /* You already have this in .board-container, decide whether to use one or the other */
-    min-height: 100vh;
-    color: #fff;
-}
-
-/* Container for each goal */
+/* ====================================== */
+/* GOAL BOARD (CADA META)                 */
+/* ====================================== */
 .goal-board {
-    border: 2px solid #ccc; /* Dynamically adjusted via style */
-    background-color: #1a1a1a; /* Dynamically adjusted as well */
+    border: 2px solid #ccc; /* Se ajusta dinámicamente con style={{ borderColor: goal.color }} */
+    background-color: #1a1a1a; /* También se puede ajustar dinámicamente */
     margin-bottom: 20px;
     border-radius: 8px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.5); /* Sombra para destacar */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    max-width: 1000px; /* Ajusta según el ancho deseado */
+    margin: 20px auto; /* Centra el board en la página */
 }
 
-/* Header of each goal */
+.goal-board:hover {
+    transform: scale(1.01);
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.1); /* Sutil brillo dorado */
+}
+
+/* Encabezado de cada meta */
 .goal-board-header {
-    padding: 10px;
+    padding: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    cursor: pointer; /* Enables collapsing */
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    transition: background-color 0.2s ease;
 }
 
-/* Goal title */
+.goal-board-header:hover {
+    background-color: rgba(255, 255, 255, 0.05); /* Leve cambio al pasar el ratón */
+}
+
+/* Título de la meta */
 .goal-board-title {
     margin-right: auto;
 }
@@ -97,37 +59,45 @@
 .goal-board-title h2 {
     margin: 0;
     color: #fff;
+    font-size: 1.4rem;
+    font-weight: bold;
+    text-align: left;
 }
 
-/* Delete goal button */
+/* Botón para eliminar meta */
 .delete-goal-btn {
-    background-color: red;
+    background-color: #d9534f; /* Un tono rojo más elegante */
     color: #fff;
     border: none;
-    padding: 6px 12px;
+    padding: 8px 16px;
     border-radius: 4px;
     cursor: pointer;
+    transition: opacity 0.2s ease;
+    font-weight: bold;
 }
 
 .delete-goal-btn:hover {
     opacity: 0.8;
 }
 
-/* Internal content of the goal board */
+/* Contenido interno de cada meta */
 .goal-board-content {
-    padding: 10px;
+    padding: 20px;
 }
 
-/* Form for adding tasks */
+/* ====================================== */
+/* FORMULARIO PARA AGREGAR TAREAS         */
+/* ====================================== */
 .task-form {
     display: flex;
     gap: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    justify-content: center; /* Centra el formulario */
 }
 
 .task-input {
     flex: 1;
-    padding: 8px;
+    padding: 10px;
     border-radius: 4px;
     border: 1px solid #333;
     background-color: #2c2c2c;
@@ -137,35 +107,57 @@
 .btn-add-task {
     background-color: gold;
     color: #1a1a1a;
-    padding: 8px 16px;
+    padding: 10px 16px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-weight: bold;
+    transition: opacity 0.2s ease;
 }
 
 .btn-add-task:hover {
     opacity: 0.8;
 }
 
-/* Container for the three columns (To Do, In Progress, Done) */
+/* ====================================== */
+/* COLUMNS CONTAINER                      */
+/* ====================================== */
 .columns-container {
     display: flex;
     gap: 20px;
-    flex-wrap: nowrap; /* Prevents line breaks */
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 20px; /* Espacio extra entre el formulario y las columnas */
 }
 
-/* Column in the new structure */
+/* ====================================== */
+/* COLUMNAS (TO DO, IN PROGRESS, DONE)    */
+/* ====================================== */
 .column {
     flex: 1;
     background-color: #2c2c2c;
     border-radius: 8px;
-    padding: 10px;
-    min-width: 200px; /* Adjust as needed */
+    padding: 15px;
+    min-width: 200px;
+    max-width: 300px; /* Ajusta si quieres columnas más anchas */
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease;
+}
+
+.column:hover {
+    transform: scale(1.01);
 }
 
 .column-title {
     color: gold;
     margin-bottom: 10px;
+    font-size: 1.2rem;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.2);
+    text-align: left;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
 }
 
 .task-list {
@@ -174,7 +166,9 @@
     gap: 10px;
 }
 
-/* Task card in the new structure */
+/* ====================================== */
+/* TARJETAS DE TAREAS                     */
+/* ====================================== */
 .task-card {
     background-color: #333;
     border: 1px solid #444;
@@ -182,43 +176,75 @@
     padding: 10px;
     color: #fff;
     cursor: grab;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Delete column */
+.task-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.1);
+}
+
+.task-card h4 {
+    margin: 0 0 8px 0;
+    font-size: 1.1rem;
+    color: gold;
+}
+
+/* Botón para editar la tarea */
+.task-card button {
+    background-color: #555;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.task-card button:hover {
+    background-color: #777;
+}
+
+/* ====================================== */
+/* COLUMNA DE BORRADO                     */
+/* ====================================== */
 .delete-column {
-    /* Prevents it from taking up all the space like the other columns */
-    width: 100px;           /* Fixed width, adjust as needed */
-    height: 120px;          /* Fixed height, adjust as needed */
+    width: 100px;
+    height: 120px;
     background-color: #990000;
     border: 2px solid red;
     border-radius: 8px;
-
-    /* Centers vertically/horizontally within the containing row */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
-    /* If using a .columns-container with display:flex,
-       margin: auto can help center it horizontally */
     margin: 0 auto;
+    box-shadow: 0 0 6px rgba(255, 0, 0, 0.4);
+    transition: transform 0.2s ease;
 }
 
-.delete-instructions {
-    color: #fff;
-    font-size: 0.9rem;
+.delete-column:hover {
+    transform: scale(1.05);
+}
+
+.column-title {
+    /* Se aplica también a la columna "Delete" si usas un h3 dentro */
     text-align: center;
-    margin: 0;
+    margin-bottom: 0;
+    color: #fff;
 }
 
-/* Edit Task Form Styling */
+/* ====================================== */
+/* FORMULARIO DE EDICIÓN DE TAREAS        */
+/* ====================================== */
 .edit-task-form {
     background-color: #2c2c2c;
-    padding: 15px;
-    margin: 15px 0;
+    padding: 20px;           /* Más padding para que no se vea tan junto */
+    margin: 20px auto;       /* Más margen superior e inferior */
     border-radius: 8px;
     text-align: left;
-    max-width: 400px; /* adjust as needed */
+    max-width: 500px;        /* Un poco más ancho */
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
 .edit-task-form h3 {
@@ -239,16 +265,18 @@
 .edit-buttons {
     display: flex;
     gap: 10px;
+    justify-content: flex-end;
 }
 
 .edit-buttons button {
     background-color: gold;
     color: #1a1a1a;
-    padding: 6px 12px;
+    padding: 8px 12px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
+    transition: opacity 0.2s ease;
 }
 
 .edit-buttons button:hover {
