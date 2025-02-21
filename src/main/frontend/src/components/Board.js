@@ -1,13 +1,14 @@
+// Board.js
 import React, { useState, useEffect } from "react";
 import "./Board.css";
 
 function Board() {
     const [goals, setGoals] = useState([]);
     const [tasksByGoal, setTasksByGoal] = useState({});
-    const [collapsedGoals, setCollapsedGoals] = useState({}); // para colapsar/expandir
+    const [collapsedGoals, setCollapsedGoals] = useState({}); // Para colapsar/expandir
 
     useEffect(() => {
-        // Cargar metas
+        // Cargar metas desde el backend
         fetch("http://localhost:8080/goals")
             .then((res) => res.json())
             .then((data) => {
@@ -31,7 +32,7 @@ function Board() {
             .catch((err) => console.error(err));
     }, []);
 
-    // Colapsar/expandir
+    // Colapsar/expandir la vista de un Goal
     const toggleCollapse = (goalId) => {
         setCollapsedGoals((prev) => ({
             ...prev,
@@ -50,9 +51,9 @@ function Board() {
                 alert(msg);
                 return;
             }
-            // Si se eliminó en backend, lo removemos de la lista local
+            // Quita la meta de la lista local
             setGoals((prev) => prev.filter((g) => g.id !== goalId));
-            // También podemos quitar sus tareas de tasksByGoal
+            // Quita también sus tareas
             setTasksByGoal((prev) => {
                 const copy = { ...prev };
                 delete copy[goalId];
@@ -78,34 +79,21 @@ function Board() {
                     <div
                         key={goal.id}
                         className="goal-board"
-                        style={{
-                            border: `2px solid ${goal.color || "#ccc"}`,
-                            marginBottom: "20px",
-                            borderRadius: "8px",
-                            backgroundColor: "#1a1a1a",
-                        }}
+                        style={{ borderColor: goal.color || "#ccc" }}
                     >
-                        {/* Encabezado con el título de la meta */}
+                        {/* Encabezado */}
                         <div
                             className="goal-board-header"
-                            style={{
-                                backgroundColor: goal.color || "#333",
-                                padding: "10px",
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                cursor: "pointer",
-                            }}
+                            style={{ backgroundColor: goal.color || "#333" }}
                         >
-                            <div onClick={() => toggleCollapse(goal.id)}>
-                                <h2 style={{ color: "#fff" }}>
-                                    {goal.title} (Goal #{goal.id})
-                                </h2>
+                            <div
+                                className="goal-board-title"
+                                onClick={() => toggleCollapse(goal.id)}
+                            >
+                                <h2>{goal.title} (Goal #{goal.id})</h2>
                             </div>
-
-                            {/* Botón para eliminar la meta */}
                             <button
-                                style={{ marginLeft: "auto" }}
+                                className="delete-goal-btn"
                                 onClick={(e) => {
                                     e.stopPropagation(); // Evita colapsar al hacer clic
                                     handleDeleteGoal(goal.id);
@@ -115,9 +103,9 @@ function Board() {
                             </button>
                         </div>
 
-                        {/* Si NO está colapsado, mostramos el tablero */}
+                        {/* Contenido si no está colapsado */}
                         {!isCollapsed && (
-                            <div className="goal-board-content" style={{ padding: "10px" }}>
+                            <div className="goal-board-content">
                                 <ColumnsContainer
                                     goal={goal}
                                     tasks={goalTasks}
@@ -132,10 +120,11 @@ function Board() {
     );
 }
 
-/** Este componente maneja las 3 columnas (To Do, In Progress, Done) y un formulario para crear nuevas tareas */
+/** Maneja las 3 columnas (To Do, In Progress, Done) y un formulario para crear nuevas tareas */
 function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
     const [newTaskTitle, setNewTaskTitle] = useState("");
 
+    // Manejo de arrastrar y soltar a las columnas
     const handleDrop = (event, targetColumn) => {
         event.preventDefault();
         const droppedData = JSON.parse(event.dataTransfer.getData("application/json"));
@@ -167,7 +156,7 @@ function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
             };
         });
 
-        // 2) Actualiza en backend
+        // 2) Actualiza en backend (PUT)
         fetch(`http://localhost:8080/tasks/${taskId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -180,7 +169,7 @@ function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
         event.dataTransfer.setData("application/json", JSON.stringify(data));
     };
 
-    // Form para crear nueva tarea
+    // Crear nueva tarea
     const handleAddTask = async (e) => {
         e.preventDefault();
         if (!newTaskTitle.trim()) {
@@ -225,14 +214,17 @@ function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
 
     return (
         <div>
-            <form onSubmit={handleAddTask} style={{ marginBottom: "10px" }}>
+            <form className="task-form" onSubmit={handleAddTask}>
                 <input
+                    className="task-input"
                     type="text"
                     placeholder="New Task Title"
                     value={newTaskTitle}
                     onChange={(e) => setNewTaskTitle(e.target.value)}
                 />
-                <button type="submit">Add Task</button>
+                <button className="btn-add-task" type="submit">
+                    Add Task
+                </button>
             </form>
 
             <div className="columns-container">
@@ -264,11 +256,14 @@ function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
 
 function Column({ title, columnKey, tasks, onDragStart, onDrop }) {
     const handleDragOver = (e) => e.preventDefault();
-    const handleDropInThisColumn = (e) => onDrop(e, columnKey);
+
+    const handleDropInThisColumn = (e) => {
+        onDrop(e, columnKey);
+    };
 
     return (
         <div className="column" onDragOver={handleDragOver} onDrop={handleDropInThisColumn}>
-            <h3>{title}</h3>
+            <h3 className="column-title">{title}</h3>
             <div className="task-list">
                 {tasks.map((task) => (
                     <TaskCard
@@ -289,11 +284,7 @@ function TaskCard({ task, columnKey, onDragStart }) {
     };
 
     return (
-        <div
-            className="task-card"
-            draggable="true"
-            onDragStart={handleDragStartCard}
-        >
+        <div className="task-card" draggable="true" onDragStart={handleDragStartCard}>
             <h4>{task.title}</h4>
             <p>{task.description}</p>
         </div>
