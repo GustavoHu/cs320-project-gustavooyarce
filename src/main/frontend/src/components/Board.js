@@ -1,4 +1,3 @@
-// Board.js
 import React, { useState, useEffect } from "react";
 import "./Board.css";
 
@@ -120,7 +119,7 @@ function Board() {
     );
 }
 
-/** Maneja las 3 columnas (To Do, In Progress, Done) y un formulario para crear nuevas tareas */
+/** Maneja las 4 columnas (To Do, In Progress, Done, Delete) y un formulario para crear nuevas tareas */
 function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
     const [newTaskTitle, setNewTaskTitle] = useState("");
 
@@ -130,38 +129,66 @@ function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
         const droppedData = JSON.parse(event.dataTransfer.getData("application/json"));
         const { sourceColumn, taskId } = droppedData;
 
-        if (sourceColumn === targetColumn) return;
+        // Si la tarea se suelta en la misma columna y no es la de "delete", no hacemos nada
+        if (sourceColumn === targetColumn && targetColumn !== "delete") return;
 
-        // 1) Actualiza local
-        setTasksByGoal((prev) => {
-            const goalTasks = prev[goal.id];
-            if (!goalTasks) return prev;
+        if (targetColumn === "delete") {
+            // 1) Eliminar del estado local
+            setTasksByGoal((prev) => {
+                const goalTasks = prev[goal.id];
+                if (!goalTasks) return prev;
 
-            const sourceTasks = [...goalTasks[sourceColumn]];
-            const idx = sourceTasks.findIndex((t) => t.id === taskId);
-            if (idx === -1) return prev;
+                // Remover la tarea de las 3 columnas
+                const newTodo = goalTasks.todo.filter((t) => t.id !== taskId);
+                const newInProgress = goalTasks.inProgress.filter((t) => t.id !== taskId);
+                const newDone = goalTasks.done.filter((t) => t.id !== taskId);
 
-            const [moved] = sourceTasks.splice(idx, 1);
-            moved.status = targetColumn;
+                return {
+                    ...prev,
+                    [goal.id]: {
+                        todo: newTodo,
+                        inProgress: newInProgress,
+                        done: newDone,
+                    },
+                };
+            });
 
-            const targetTasks = [...goalTasks[targetColumn], moved];
+            // 2) Eliminar en backend
+            fetch(`http://localhost:8080/tasks/${taskId}`, {
+                method: "DELETE",
+            }).catch((err) => console.error(err));
+        } else {
+            // Mover tarea a otra columna (To Do, In Progress, Done)
+            setTasksByGoal((prev) => {
+                const goalTasks = prev[goal.id];
+                if (!goalTasks) return prev;
 
-            return {
-                ...prev,
-                [goal.id]: {
-                    ...goalTasks,
-                    [sourceColumn]: sourceTasks,
-                    [targetColumn]: targetTasks,
-                },
-            };
-        });
+                const sourceTasks = [...goalTasks[sourceColumn]];
+                const idx = sourceTasks.findIndex((t) => t.id === taskId);
+                if (idx === -1) return prev;
 
-        // 2) Actualiza en backend (PUT)
-        fetch(`http://localhost:8080/tasks/${taskId}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: targetColumn }),
-        }).catch((err) => console.error(err));
+                const [moved] = sourceTasks.splice(idx, 1);
+                moved.status = targetColumn;
+
+                const targetTasks = [...goalTasks[targetColumn], moved];
+
+                return {
+                    ...prev,
+                    [goal.id]: {
+                        ...goalTasks,
+                        [sourceColumn]: sourceTasks,
+                        [targetColumn]: targetTasks,
+                    },
+                };
+            });
+
+            // Actualizar en backend (PUT)
+            fetch(`http://localhost:8080/tasks/${taskId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: targetColumn }),
+            }).catch((err) => console.error(err));
+        }
     };
 
     const handleDragStart = (event, sourceColumn, taskId) => {
@@ -249,11 +276,13 @@ function ColumnsContainer({ goal, tasks, setTasksByGoal }) {
                     onDragStart={handleDragStart}
                     onDrop={handleDrop}
                 />
+                <DeleteColumn onDragStart={handleDragStart} onDrop={handleDrop} />
             </div>
         </div>
     );
 }
 
+/* Columna genérica */
 function Column({ title, columnKey, tasks, onDragStart, onDrop }) {
     const handleDragOver = (e) => e.preventDefault();
 
@@ -278,6 +307,26 @@ function Column({ title, columnKey, tasks, onDragStart, onDrop }) {
     );
 }
 
+/* Nueva Columna especial para "Delete" */
+function DeleteColumn({ onDragStart, onDrop }) {
+    const handleDragOver = (e) => e.preventDefault();
+
+    const handleDropInThisColumn = (e) => {
+        onDrop(e, "delete");
+    };
+
+    return (
+        <div
+            className="delete-column"
+            onDragOver={handleDragOver}
+            onDrop={handleDropInThisColumn}
+        >
+            <h3 className="column-title">Delete</h3>
+        </div>
+    );
+}
+
+/* Tarjeta de tarea */
 function TaskCard({ task, columnKey, onDragStart }) {
     const handleDragStartCard = (e) => {
         onDragStart(e, columnKey, task.id);
